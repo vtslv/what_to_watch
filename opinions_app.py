@@ -2,6 +2,7 @@ from datetime import datetime
 from random import randrange
 
 from flask import abort, Flask, redirect, render_template, url_for, flash
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, TextAreaField, URLField
@@ -19,6 +20,7 @@ app.config['SECRET_KEY'] = 'MY SECRET KEY'
 # Создаётся экземпляр класса SQLAlchemy и передаётся
 # в качестве параметра экземпляр приложения Flask
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 
 class Opinion(db.Model):
@@ -34,6 +36,8 @@ class Opinion(db.Model):
     # Дата и время — текущее время,
     # по этому столбцу база данных будет проиндексирована
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    # Новое поле
+    added_by = db.Column(db.String(64))
 
 
 # Класс формы опишите сразу после модели Opinion
