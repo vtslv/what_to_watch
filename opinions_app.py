@@ -1,7 +1,7 @@
 from datetime import datetime
 from random import randrange
 
-from flask import Flask, redirect, render_template, url_for, flash
+from flask import abort, Flask, redirect, render_template, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, TextAreaField, URLField
@@ -54,14 +54,30 @@ class OpinionForm(FlaskForm):
     submit = SubmitField('Добавить')
 
 
+# Тут декорируется обработчик и указывается код нужной ошибки
+@app.errorhandler(404)
+def page_not_found(error):
+    # В качестве ответа возвращается собственный шаблон
+    # и код ошибки
+    return render_template('404.html'), 404
+
+
+@app.errorhandler(500)
+def internal_error(error):
+    # В таких случаях можно откатить незафиксированные изменения в БД
+    db.session.rollback()
+    return render_template('500.html'), 500
+
+
 @app.route('/')
 def index_view():
     # Определяется количество мнений в базе данных
     quantity = Opinion.query.count()
     # Если мнений нет,
     if not quantity:
+        abort(404)
         # то возвращается сообщение
-        return 'В базе данных мнений о фильмах нет.'
+        # return 'В базе данных мнений о фильмах нет.'
     # Иначе выбирается случайное число в диапазоне от 0 и до quantity
     offset_value = randrange(quantity)
     # И определяется случайный объект
