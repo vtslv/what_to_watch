@@ -7,21 +7,36 @@ from .forms import OpinionForm
 from .models import Opinion
 
 
+def random_opinion():
+    quantity = Opinion.query.count()
+    if quantity:
+        offset_value = randrange(quantity)
+        opinion = Opinion.query.offset(offset_value).first()
+        return opinion
+
+
 @app.route('/')
 def index_view():
-    # Определяется количество мнений в базе данных
-    quantity = Opinion.query.count()
-    # Если мнений нет,
-    if not quantity:
-        abort(404)
-        # то возвращается сообщение
-        # return 'В базе данных мнений о фильмах нет.'
-    # Иначе выбирается случайное число в диапазоне от 0 и до quantity
-    offset_value = randrange(quantity)
-    # И определяется случайный объект
-    opinion = Opinion.query.offset(offset_value).first()
-    # Вот здесь в шаблон передаётся весь объект opinion
-    return render_template('opinion.html', opinion=opinion)
+    opinion = random_opinion()
+    if opinion is not None:
+        return render_template('opinion.html', opinion=opinion)
+    abort(404)
+
+# @app.route('/')
+# def index_view():
+#     # Определяется количество мнений в базе данных
+#     quantity = Opinion.query.count()
+#     # Если мнений нет,
+#     if not quantity:
+#         abort(404)
+#         # то возвращается сообщение
+#         # return 'В базе данных мнений о фильмах нет.'
+#     # Иначе выбирается случайное число в диапазоне от 0 и до quantity
+#     offset_value = randrange(quantity)
+#     # И определяется случайный объект
+#     opinion = Opinion.query.offset(offset_value).first()
+#     # Вот здесь в шаблон передаётся весь объект opinion
+#     return render_template('opinion.html', opinion=opinion)
 
 
 @app.route('/add', methods=['GET', 'POST'])
